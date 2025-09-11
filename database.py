@@ -24,7 +24,8 @@ class UserDatabase:
                 'port': port
             }
             self.use_url = False
-        self.init_db()
+        # Temporarily disable database init for Railway deployment
+        # self.init_db()
     
     def get_connection(self):
         if self.use_url:
@@ -33,20 +34,24 @@ class UserDatabase:
             return psycopg2.connect(**self.db_config)
     
     def init_db(self):
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(50) UNIQUE NOT NULL,
-                email VARCHAR(100) UNIQUE NOT NULL,
-                password_hash VARCHAR(64) NOT NULL,
-                language VARCHAR(10) DEFAULT 'en',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        conn.commit()
-        conn.close()
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(50) UNIQUE NOT NULL,
+                    email VARCHAR(100) UNIQUE NOT NULL,
+                    password_hash VARCHAR(64) NOT NULL,
+                    language VARCHAR(10) DEFAULT 'en',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Database init failed: {e}")
+            pass  # Continue without database for now
     
     def hash_password(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
