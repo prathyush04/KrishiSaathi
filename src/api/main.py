@@ -15,9 +15,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://*.netlify.app",
-        "https://krishisaathi.netlify.app",
-        "*"  # Allow all origins for now
+        "https://68c2c0ec765ff80008709c8a--krishisaathiii.netlify.app",
+        "https://krishisaathiii.netlify.app",
+        "*"  # Temporary fallback
     ],
     allow_credentials=True,
     allow_methods=["*"],
