@@ -9,7 +9,7 @@ translation_cache = {}
 
 # Base English text to translate
 BASE_TEXTS = {
-    'welcome': 'Welcome to AgriSmart AI',
+    'welcome': 'Welcome to KrishiSaathi',
     'login': 'Login',
     'register': 'Register',
     'username': 'Username',

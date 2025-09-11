@@ -27,7 +27,7 @@ const App = () => {
   
   const [diseaseImage, setDiseaseImage] = useState(null);
 
-  const API_BASE = 'https://web-production-9f561.up.railway.app';
+  const API_BASE = 'http://127.0.0.1:8000';
 
   useEffect(() => {
     fetchLanguages();
