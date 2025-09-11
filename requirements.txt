@@ -9,6 +9,7 @@ pyyaml
 # API
 fastapi
 uvicorn
+python-multipart
 
 # Deep learning for disease classification
 tensorflow
