@@ -1,0 +1,28 @@
+# Global training/eval config
+seed: 42
+models_dir: models
+
+crop:
+  csv_path: data/raw/crop_recommendation/crop_recommendation.csv
+  target: label
+  test_size: 0.2
+  rf_params:
+    n_estimators: 300
+    max_depth: null
+    n_jobs: -1
+
+fertilizer:
+  csv_path: data/raw/fertilizer_recommendation/fertilizer.csv
+  target: Fertilizer Name
+  test_size: 0.2
+  rf_params:
+    n_estimators: 300
+    max_depth: null
+    n_jobs: -1
+
+disease:
+  data_dir: data/raw/plant_disease
+  img_size: [224, 224]
+  batch_size: 32
+  epochs: 10
+  base_trainable_layers: 20   # fine‑tune last 20 layers of MobileNetV2

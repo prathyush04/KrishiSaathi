@@ -1,0 +1,21 @@
+# Core
+numpy
+pandas
+scikit-learn
+joblib
+pydantic
+pyyaml
+
+# API
+fastapi
+uvicorn
+
+# Deep learning for disease classification
+tensorflow
+pillow
+
+# Optional: experiments and visuals
+matplotlib
+
+# Database
+psycopg2-binary
