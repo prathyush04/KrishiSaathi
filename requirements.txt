@@ -19,4 +19,4 @@ pillow
 matplotlib
 
 # Database
-psycopg2-binary
+pymongo

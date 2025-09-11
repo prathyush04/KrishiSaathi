@@ -5,7 +5,7 @@ from ..inference.predict import predict_crop, predict_fertilizer, predict_diseas
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
-from database import UserDatabase
+from mongo_database import UserDatabase
 from languages import INDIAN_LANGUAGES
 from translator import get_translations
 
