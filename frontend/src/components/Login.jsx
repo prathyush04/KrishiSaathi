@@ -18,7 +18,7 @@ const Login = ({ onLogin, languages, translations }) => {
       : formData;
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+      const response = await fetch(`https://web-production-9f561.up.railway.app${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
