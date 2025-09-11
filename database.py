@@ -5,22 +5,32 @@ from datetime import datetime
 
 class UserDatabase:
     def __init__(self):
-        db_name = os.getenv("DB_NAME", "KrishiSaathi")
-        user = os.getenv("DB_USER", "postgres")
-        password = os.getenv("DB_PASSWORD", "Prathyush@04")
-        host = os.getenv("DB_HOST", "localhost")
-        port = os.getenv("DB_PORT", "5432")
-        self.db_config = {
-            'dbname': db_name,
-            'user': user,
-            'password': password,
-            'host': host,
-            'port': port
-        }
+        # Try DATABASE_URL first (for Railway), fallback to individual vars
+        database_url = os.getenv('DATABASE_URL')
+        if database_url:
+            self.database_url = database_url
+            self.use_url = True
+        else:
+            db_name = os.getenv("DB_NAME", "KrishiSaathi")
+            user = os.getenv("DB_USER", "postgres")
+            password = os.getenv("DB_PASSWORD", "Prathyush@04")
+            host = os.getenv("DB_HOST", "localhost")
+            port = os.getenv("DB_PORT", "5432")
+            self.db_config = {
+                'dbname': db_name,
+                'user': user,
+                'password': password,
+                'host': host,
+                'port': port
+            }
+            self.use_url = False
         self.init_db()
     
     def get_connection(self):
-        return psycopg2.connect(**self.db_config)
+        if self.use_url:
+            return psycopg2.connect(self.database_url)
+        else:
+            return psycopg2.connect(**self.db_config)
     
     def init_db(self):
         conn = self.get_connection()
