@@ -20,3 +20,15 @@ matplotlib
 
 # Database
 pymongo
+
+# Chatbot dependencies
+nltk
+sentence-transformers
+requests
+
+# LLaMA/Transformer dependencies
+transformers
+torch
+datasets
+accelerate
+bitsandbytes

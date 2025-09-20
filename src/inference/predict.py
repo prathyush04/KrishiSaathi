@@ -31,7 +31,7 @@ def _lazy_disease():
     global _dis_model, _dis_labels
     if _dis_model is None:
         _dis_model = tf.keras.models.load_model(os.path.join(MODELS_DIR, "disease_model.h5"))
-        _dis_labels = ['Healthy', 'Powdery', 'Rust']
+        _dis_labels = ['Healthy', 'Powdery Mildew', 'Rust Disease']
     return _dis_model, _dis_labels
 
 def predict_crop(features: dict) -> dict:
@@ -86,12 +86,26 @@ def predict_fertilizer(features: dict) -> dict:
 def predict_disease(image_bytes: bytes) -> dict:
     model, labels = _lazy_disease()
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB").resize((224,224))
-    arr = np.array(img)[None, ...]
-    arr = tf.keras.applications.mobilenet_v2.preprocess_input(arr)
+    arr = np.array(img) / 255.0  # Normalize to [0,1]
+    arr = arr[None, ...]  # Add batch dimension
     probs = model.predict(arr, verbose=0)[0]
     idx = int(np.argmax(probs))
+    confidence = float(probs[idx])
+    disease = labels[idx]
+    
+    # 7-class severity mapping based on confidence
+    if disease == 'Healthy':
+        final_class = 'Healthy'
+    elif confidence >= 0.85:
+        final_class = f'{disease} - Early'
+    elif confidence >= 0.65:
+        final_class = f'{disease} - Moderate'
+    else:
+        final_class = f'{disease} - Severe'
     
     return {
-        "disease": labels[idx], 
-        "confidence": float(probs[idx])
+        "disease": final_class,
+        "base_disease": disease,
+        "confidence": confidence,
+        "severity": "None" if disease == 'Healthy' else final_class.split(' - ')[1]
     }

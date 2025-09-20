@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Leaf, Droplets, Bug, ChevronRight, TrendingUp, Shield, LogOut, Menu, X } from 'lucide-react';
+import { Upload, Leaf, Droplets, Bug, ChevronRight, TrendingUp, Shield, LogOut, Menu, X, MessageCircle } from 'lucide-react';
 import Login from './components/Login';
 import TranslatedText from './components/TranslatedText';
 import ComingSoon from './components/ComingSoon';
+import ChatBot from './components/ChatBot';
 
 
 
@@ -15,6 +16,14 @@ const App = () => {
   const [result, setResult] = useState(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showChatBot, setShowChatBot] = useState(() => {
+    return localStorage.getItem('krishisaathi_show_chat') === 'true';
+  });
+
+  // Save chat visibility state
+  useEffect(() => {
+    localStorage.setItem('krishisaathi_show_chat', showChatBot.toString());
+  }, [showChatBot]);
 
   // Form states
   const [cropForm, setCropForm] = useState({
@@ -101,6 +110,10 @@ const App = () => {
 
   if (showComingSoon) {
     return <ComingSoon onBack={() => setShowComingSoon(false)} user={user} />;
+  }
+
+  if (showChatBot) {
+    return <ChatBot onBack={() => setShowChatBot(false)} user={user} />;
   }
 
   const handleCropSubmit = async () => {
@@ -218,8 +231,15 @@ const App = () => {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              {/* Desktop - Language selector and logout */}
+              {/* Desktop - Chat, Language selector and logout */}
               <div className="hidden sm:flex sm:items-center sm:gap-4">
+                <button
+                  onClick={() => setShowChatBot(true)}
+                  className="flex items-center gap-2 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Chat
+                </button>
                 <select
                   value={user.language}
                   onChange={(e) => changeLanguage(e.target.value)}
@@ -250,6 +270,13 @@ const App = () => {
                 {/* Mobile dropdown */}
                 {showMobileMenu && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    <button
+                      onClick={() => { setShowChatBot(true); setShowMobileMenu(false); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-left text-green-600 hover:bg-green-50 border-b border-gray-100"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Chat
+                    </button>
                     <div className="p-3 border-b border-gray-100">
                       <select
                         value={user.language}
@@ -693,16 +720,26 @@ const App = () => {
                     {result.disease && (
                       <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
                         <h4 className="text-lg font-semibold text-orange-800 mb-3">Disease Detection Result</h4>
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
-                            <Bug className="w-6 h-6 text-white" />
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
+                              <Bug className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-xl font-bold text-orange-800">{result.disease}</p>
+                              {result.confidence && (
+                                <p className="text-orange-600">Confidence: {(result.confidence * 100).toFixed(1)}%</p>
+                              )}
+                              {result.severity && result.severity !== 'None' && (
+                                <p className="text-sm text-orange-700 font-medium">Severity: {result.severity}</p>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-xl font-bold text-orange-800">{result.disease}</p>
-                            {result.confidence && (
-                              <p className="text-orange-600">Confidence: {(result.confidence * 100).toFixed(1)}%</p>
-                            )}
-                          </div>
+                          {result.base_disease && result.base_disease !== result.disease && (
+                            <div className="bg-white rounded-lg p-3 border border-orange-200">
+                              <p className="text-sm text-gray-600">Base Disease: <span className="font-medium">{result.base_disease}</span></p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -714,73 +751,72 @@ const App = () => {
         </div>
 
         {/* Chatbot Section */}
-        <section className="mt-16 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl shadow-xl p-8 border border-green-100">
+        <section className="mt-8 sm:mt-16 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-green-100">
           <div className="text-center">
-            <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              <TranslatedText text="Want to speak to our KrishiSaathi?" language={user?.language} />
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+              <TranslatedText text="KrishiSaathi AI Assistant" language={user?.language} />
             </h3>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              <TranslatedText text="Get instant answers to your farming questions with our AI-powered chatbot assistant." language={user?.language} />
+            <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+              <TranslatedText text="Get instant answers from our agricultural knowledge base. Ask questions about farming, crops, soil management, and more." language={user?.language} />
             </p>
             <button 
-              onClick={() => setShowComingSoon(true)}
-              className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              onClick={() => setShowChatBot(true)}
+              className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              <TranslatedText text="Chat with KrishiSaathi" language={user?.language} />
+              <TranslatedText text="Chat with KrishiSaathi AI" language={user?.language} />
             </button>
-            <p className="text-sm text-gray-500 mt-4">
-              <TranslatedText text="Coming Soon - AI-powered farming assistant" language={user?.language} />
+            <p className="text-xs sm:text-sm text-gray-500 mt-3 sm:mt-4">
+              <TranslatedText text="Powered by agricultural expertise and AI" language={user?.language} />
             </p>
           </div>
         </section>
 
         {/* Features Section */}
-        <section className="mt-16 bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+        <section className="mt-8 sm:mt-16 bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+          <div className="text-center mb-8 sm:mb-12">
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
               <TranslatedText text="Why Choose KrishiSaathi?" language={user?.language} />
             </h3>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our AI models are trained on extensive agricultural datasets to provide accurate, 
-              actionable insights for modern farming.
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+              <TranslatedText text="Our AI models are trained on comprehensive agricultural data from government experts and farmers across India." language={user?.language} />
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-xl bg-green-50 border border-green-100">
-              <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Leaf className="w-8 h-8 text-white" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="text-center p-4 sm:p-6 rounded-xl bg-green-50 border border-green-100">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Leaf className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h4 className="text-xl font-bold text-gray-900 mb-3">
+              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">
                 <TranslatedText text="Smart Crop Selection" language={user?.language} />
               </h4>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 <TranslatedText text="Advanced algorithms analyze soil nutrients, climate, and environmental factors to recommend the most suitable crops for maximum yield." language={user?.language} />
               </p>
             </div>
             
-            <div className="text-center p-6 rounded-xl bg-blue-50 border border-blue-100">
-              <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Droplets className="w-8 h-8 text-white" />
+            <div className="text-center p-4 sm:p-6 rounded-xl bg-blue-50 border border-blue-100">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Droplets className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h4 className="text-xl font-bold text-gray-900 mb-3">Precision Fertilization</h4>
-              <p className="text-gray-600">
+              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Precision Fertilization</h4>
+              <p className="text-sm sm:text-base text-gray-600">
                 Get personalized fertilizer recommendations based on soil composition, 
                 crop requirements, and current nutrient levels for optimal growth.
               </p>
             </div>
             
-            <div className="text-center p-6 rounded-xl bg-orange-50 border border-orange-100">
-              <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Bug className="w-8 h-8 text-white" />
+            <div className="text-center p-4 sm:p-6 rounded-xl bg-orange-50 border border-orange-100 sm:col-span-2 lg:col-span-1">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Bug className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h4 className="text-xl font-bold text-gray-900 mb-3">Early Disease Detection</h4>
-              <p className="text-gray-600">
+              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Early Disease Detection</h4>
+              <p className="text-sm sm:text-base text-gray-600">
                 Upload plant images for instant disease identification using deep learning 
                 models trained on thousands of plant pathology images.
               </p>
@@ -797,6 +833,15 @@ const App = () => {
           </p>
         </div>
       </footer>
+
+      {/* Sticky Chat Button */}
+      <button
+        onClick={() => setShowChatBot(true)}
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-50 hover:scale-110"
+        title="Chat with KrishiSaathi AI"
+      >
+        <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+      </button>
     </div>
   );
 };

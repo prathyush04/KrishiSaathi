@@ -9,7 +9,21 @@ from database import UserDatabase
 from languages import INDIAN_LANGUAGES
 from translator import get_translations
 
-app = FastAPI(title="Agri ML API", version="1.0.0")
+# Import LLaMA chatbot and speech routes
+sys.path.append(os.path.join(os.path.dirname(__file__), '../chatbot'))
+from llama_chatbot_simple import simple_llama_chatbot as chatbot
+
+# Import speech routes from the same directory
+try:
+    from .speech_routes import router as speech_router
+except ImportError:
+    # Fallback for direct execution
+    import sys
+    import os
+    sys.path.append(os.path.dirname(__file__))
+    from speech_routes import router as speech_router
+
+app = FastAPI(title="KrishiSaathi API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +37,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include speech routes
+app.include_router(speech_router, prefix="/api", tags=["speech"])
 db = UserDatabase()
 
 class CropFeatures(BaseModel):
@@ -57,6 +74,10 @@ class UserLogin(BaseModel):
 class LanguageUpdate(BaseModel):
     username: str
     language: str
+
+class ChatMessage(BaseModel):
+    message: str
+    user_id: str = None
 
 @app.post("/predict/crop")
 def predict_crop_endpoint(body: CropFeatures):
@@ -119,3 +140,20 @@ def update_language(update: LanguageUpdate):
     
     # Temporarily bypass database for demo
     return {"message": "Language updated successfully"}
+
+@app.post("/chat")
+def chat_with_krishisaathi(chat: ChatMessage):
+    try:
+        response = chatbot.get_response(chat.message)
+        return {
+            "success": True,
+            "response": response,
+            "timestamp": "now"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": "Sorry, I'm having trouble right now. Please try again.",
+            "details": str(e)
+        }
+
